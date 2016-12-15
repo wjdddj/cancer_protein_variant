@@ -150,9 +150,10 @@ def build_pepDB(refSeq_file, variants_file, output_dir, mut_only, max_miss, min_
         
     len_profile = len(uniq_mut_pept)
     print 'Removed %d mutant peptides due to nonsense mutation on different miss cleavage yielded peptides.' % (len(mut_pept) - len_profile)
-    print 'Finally, annotated %d peptides.' % (len_profile)
+    print 'Annotated %d mutant peptides.' % (len_profile)
     
     pep_profile.extend(uniq_mut_pept)
+    print 'Finally, annotated %d peptides.' % (len(pep_profile))
     
     if mut_only == 1:
         print "Export only mutant peptides..."
