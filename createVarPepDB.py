@@ -1,16 +1,16 @@
 from class_variant import variant
 from class_protein import protein
 from class_peptide import peptide
-import cmi_var_functions as cfunc
-import time, sys, getopt
 from Bio import SeqIO, SeqUtils
 from time import localtime, strftime
+import cmi_var_functions as cfunc
+import time, sys, getopt
 
 ##
 def print_help():
     print "Create fasta database for mutant proteins or mutant trypsinized peptides."
-    print "USAGE: python createVarPepDB.py -s protein -o xxx [uniprot_refSeqxxx.txt] [variantxxx.txt]"
-    print "       python createVarPepDB.py -s peptide -o xxx -n2 -m6 -x144 [uniprot_refSeqxxx.txt] [variantxxx.txt]"
+    print "USAGE: python createVarPepDB.py -s protein -o xxx -w1 [uniprot_refSeqxxx.txt] [variantxxx.txt]"
+    print "       python createVarPepDB.py -s peptide -o xxx -n2 -m6 -x144 -w1 [uniprot_refSeqxxx.txt] [variantxxx.txt]"
     print "\n"
     print "OPTIONS: "
     print "-s, --setting     str     type of output fasta database. [protein|peptide]"
@@ -85,6 +85,7 @@ def build_pepDB(refSeq_file, variants_file, output_dir, mut_only, max_miss, min_
     
     # filter variants to focus on the ones only associated with the longest transcript
     refSeq = refSeq_read
+    # variants = variants_read
     # refSeq = cfunc.get_longest_records(refSeq)
     variants = {}
     for key, var in variants_read.iteritems():
@@ -198,8 +199,8 @@ def build_protDB(refSeq_file, variants_file, output_dir, mut_only):
             prot_profile.append(mprotein)
             len_mutant+= 1
     len_profile = len(prot_profile)
-    print '\nFinished %d reference proteins.' % (len_protein)
-    print '\nFinished %d mutant proteins.' % (len_mutant)
+    print 'Finished %d reference proteins.' % (len_protein)
+    print 'Finished %d mutant proteins.' % (len_mutant)
     print 'Annotated %d peptides.\n' % (len_profile)    
     
     if mut_only == 1:

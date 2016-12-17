@@ -10,9 +10,9 @@ get_cmi_var=$current_dir"/get_cmi_variant.R"
 prep_input_vcf=$current_dir"/prepare_input_vcf_cmi_variants.py"
 parse_snpEff_vcf=$current_dir"/parse_vcf_to_variants.py"
 get_refSeq=$current_dir"/get_refSeq.py"
-uniprotDB=$HOME"/Documents/Project6_Proteomics/databases/20160930_Ensembl_GRCh37/pep/Homo_sapiens.GRCh37.pep.all.fa"
+ensemblDB=$HOME"/Documents/Project6_Proteomics/databases/20160930_Ensembl_GRCh37/pep/Homo_sapiens.GRCh37.pep.all.fa"
+map_tab_file=$HOME"/Users/jwang/Documents/Project6_Proteomics/databases/20160915_Uniprot_ID_mapping/HUMAN_9606_idmapping.dat"
 createDB=$current_dir"/createVarPepDB.py"
-refSeq=$current_dir"/20160930_cmi_ref_seq.fa"
 Genome="GRCh37.75"
 
 mkdir $output_dir
@@ -37,8 +37,8 @@ python $parse_snpEff_vcf -i $out_vcf_file -o $variant_file
 
 # obtain reference uniprot protein sequences for the annotated variants
 echo "obtaining reference uniprot sequences..."
-refSeq_file=$tmp_dir"uniprot_refSeq_"`ts`".fa"
-python $get_refSeq -i $variant_file -d $uniprotDB -o $refSeq_file
+refSeq_file=$tmp_dir"ensembl_refSeq_"`ts`".fa"
+python $get_refSeq -i $variant_file -d $ensemblDB -o $refSeq_file -m $map_tab_file
 
 # create mutant peptide fasta database
 echo "creating mutant database..."

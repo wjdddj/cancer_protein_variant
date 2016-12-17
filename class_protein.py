@@ -5,13 +5,17 @@ from class_variant import variant
 class protein:
     
     def __init__(self, header, sequence):
+        
         self.head = header
         self.seq = sequence
+        self.length = self.get_len(self.seq)
+        self.rm_X()
+        
         self.transcript = self.get_transcript(self.head)
         self.protein = self.get_protein(self.head)
         self.gene = self.get_gene(self.head)
-        self.length = self.get_len(self.seq)
-        self.rm_X()
+        self.name = self.get_name(self.head)
+        self.uniprotAC = self.get_uniprotAC(self.head)
         self.id = self.transcript + '_REF'
         self.mutation = 'REF'
     
@@ -31,9 +35,24 @@ class protein:
         return gene
     
     @staticmethod
+    def get_name(head):
+        name = re.search('(?<=Gene_Name:).*', head).group(0)
+        return name
+    
+    @staticmethod
+    def get_uniprotAC(head):
+        uniprotAC = re.search('(?<=UniProtKBAC:).*', head).group(0)
+        return uniprotAC
+    
+    @staticmethod
     def get_len(seq):
         length = len(seq)
         return length
+    
+    #@staticmethod
+    #def get_id(ID, idType, mapTab):
+        
+    #    return
     
     ## trypsin digestion generator, cut after K or R when not before P.
     ## returns substring of digested peptide, peptide start position, peptide length, peptide No (order from the start)
@@ -67,11 +86,11 @@ class protein:
     
     
     # output structure for each peptide is 
-    # ['peptide seq', 
-    #  'start position in reference', 
-    #  'peptide length', 
-    #  'order from the start', 
-    #  'number of miss cleavage']
+    # [str(peptide seq), 
+    #  int(start position in reference), 
+    #  int(peptide length), 
+    #  int(order from the start), 
+    #  int(number of miss cleavage)]
     @staticmethod
     def get_trypsin_profile(seq, max_miss = 0):
         trypsin_out = list(protein.trypsin(seq))
@@ -120,10 +139,17 @@ class protein:
         return
     
     # For reference sequence
-    # append to trypsin_profile
-    # [ENST, 
-    #  pepID = "ENST00000347330_TRP0001730007REF", 
-    #  variant type]
+    # append last three items to trypsin_profile to make it
+    # [str(peptide seq), 
+    #  int(start position in reference), 
+    #  int(peptide length), 
+    #  int(order from the start), 
+    #  int(number of miss cleavage),
+    #  str(ENST), 
+    #  str(pepID), 
+    #  str(variant type),
+    #  str(Gene Name),
+    #  str(UniProtKBAC)]
     def annotate_pep(self):
         for item in self.trypsin_profile:
             item.append(self.transcript) # Ensembl transcript id
@@ -133,28 +159,39 @@ class protein:
                         str(item[2]).zfill(4) + 
                         'REF') # pepID
             item.append('REF') # variant information reference to full length protein
+            item.append(self.name)
+            item.append(self.uniprotAC)
             # self.trypsin_profile[i].append('Ref') # variant information reference to digested peptide
         return
     
-    # For mutant sequence, mainly mutations that affecting trypsinization. 
-    # append to trypsin_profile only novel peptides resulted from trypsinization
-    # [ENST, 
-    #  pepID = "ENST00000347330_TRP0001730007REF", 
-    #  variant type]    
+    # For mutant sequence, mutations that affecting trypsinization. 
+    # mainly used to append to trypsin_profile only novel peptides resulted from trypsinization
+    # [str(peptide seq), 
+    #  int(start position in reference), 
+    #  int(peptide length), 
+    #  int(order from the start), 
+    #  int(number of miss cleavage),
+    #  str(ENST), 
+    #  str(pepID), 
+    #  str(variant type),
+    #  str(Gene Name),
+    #  str(UniProtKBAC)]
     def annotate_pepvar(self, var, max_miss = 0):
-        pep_profile_seq = set([item[0] for item in self.trypsin_profile])
+        pep_profile_seq = set([item[0]+str(item[1]) for item in self.trypsin_profile]) # use both seq and position to id novel peptide
         newSeq = self.mutate(self.seq, var)
         if newSeq != self.seq:
             pep_profile_var = protein.get_trypsin_profile(newSeq, max_miss = max_miss)
             for item in pep_profile_var:
-                if item[0] not in pep_profile_seq:
+                if item[0]+str(item[1]) not in pep_profile_seq:
                     item.append(self.transcript) # Ensembl transcript id
                     item.append(self.transcript + 
                                 '_TRP' + 
                                 str(item[1]).zfill(6) + 
                                 str(item[2]).zfill(4) + 
-                                var.var1)
-                    item.append(var.var1) # variant information reference to full length protein
+                                var.var1) # pepID
+                    item.append(var.var1) # variant information reference to full length protein defined by ENST ID
+                    item.append(self.name)
+                    item.append(self.uniprotAC)
                     self.trypsin_profile.append(item)
         return
     

@@ -7,7 +7,7 @@ from class_protein import protein
 class peptide:
     
     def __init__(self, peptide_profile):
-        self.seq, self.start_pos, self.length, self.count, self.n_miss, self.transcript, self.pepID, self.mutation = peptide_profile
+        self.seq, self.start_pos, self.length, self.count, self.n_miss, self.transcript, self.pepID, self.mutation, self.name, self.uniprotAC = peptide_profile
         #self.transcript, self.pepID, self.mutation = peptide_profile[5:8]
         return
     
@@ -75,11 +75,31 @@ class peptide:
             self.mut_pept[var.var1] = protein.mutate(self.seq, shifted_var)
         return
     
+    # peptide profile
+    # [str(peptide seq), 
+    #  int(start position in reference), 
+    #  int(peptide length), 
+    #  int(order from the start), 
+    #  int(number of miss cleavage),
+    #  str(ENST), 
+    #  str(pepID), 
+    #  str(variant type),
+    #  str(Gene Name),
+    #  srt(UniProtKBAC)]    
     def annotate(self):
         self.annotated_profile = []
         for key in self.mut_pept.keys():
             item = self.mut_pept[key]
-            mut_profile = [item, self.start_pos, len(item), self.count, self.n_miss, self.transcript, self.pepID+'_'+key, self.mutation+':'+':'.join(key.split('_'))]
+            mut_profile = [item, 
+                           self.start_pos, 
+                           len(item), 
+                           self.count, 
+                           self.n_miss, 
+                           self.transcript, 
+                           self.pepID+'_'+key, 
+                           self.mutation+':'+':'.join(key.split('_')),
+                           self.name,
+                           self.uniprotAC]
             self.annotated_profile.append(mut_profile)
         return
     

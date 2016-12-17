@@ -87,10 +87,12 @@ def convert_id(enst, field):
 def pep_to_SeqRecord(pep):
     seq = Seq(pep[0], generic_protein)
     record = SeqRecord(seq, id = pep[6])
+    record.name = str(pep[8])
     record.annotations['Mutation'] = pep[7].replace('REF:', '')
     record.annotations['nMissCleavage'] = pep[4]
     record.annotations['ENST'] = str(pep[5])
     record.annotations['Position'] = int(pep[1])
+    record.annotations['UniProtKBAC'] = str(pep[9])
     record.description = '|'.join([str(k)+':'+str(v) for k,v in record.annotations.items()])
     return record
 
@@ -98,10 +100,12 @@ def pep_to_SeqRecord(pep):
 def protein_to_SeqRecord(protein):
     seq = Seq(protein.seq, generic_protein)
     record = SeqRecord(seq, id = protein.id)
+    record.name = protein.name
     record.annotations['ENST'] = protein.transcript
     record.annotations['ENSG'] = protein.gene
     record.annotations['ENSP'] = protein.protein    
     record.annotations['Mutation'] = protein.mutation
+    record.annotations['UniProtKBAC'] = protein.uniprotAC
     record.description = '|'.join([str(k)+':'+str(v) for k,v in record.annotations.items()])
     return record
 
